@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - near-deep-yield-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - influxdb
+    environment:
+      - NODE_ENV=production
+      - INFLUXDB_URL=http://influxdb:8087
+      - NEAR_NODE_URL=https://rpc.testnet.near.org
+      - NEAR_NETWORK_ID=testnet
+      - NEAR_CONTRACT_ID=tawfig2030ai.testnet
+      - NEAR_ACCOUNT_ID=tawfig2030ai.testnet
+      - NEAR_PRIVATE_KEY=ed25519:5T2tqwzcmD9qkPkSbBmJXfcLUgbfuLRGTbeX7WnKhmWBqU1UJ5fTehSMDnM4wjEhMJrVevE6vjS8bXFKZD5icwe4
+    restart: unless-stopped
+    networks:
+      - near-deep-yield-network
+
+  influxdb:
+    image: influxdb:latest
+    ports:
+      - "8087:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUX_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUX_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUX_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUX_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN}
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+    restart: unless-stopped
+    networks:
+      - near-deep-yield-network
+
+  keeper-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.keeper
+    environment:
+      - NODE_ENV=production
+      - INFLUXDB_URL=http://influxdb:8087
+      - NEAR_NODE_URL=https://rpc.testnet.near.org
+      - NEAR_NETWORK_ID=testnet
+      - NEAR_CONTRACT_ID=tawfig2030ai.testnet
+      - NEAR_ACCOUNT_ID=tawfig2030ai.testnet
+      - NEAR_PRIVATE_KEY=ed25519:5T2tqwzcmD9qkPkSbBmJXfcLUgbfuLRGTbeX7WnKhmWBqU1UJ5fTehSMDnM4wjEhMJrVevE6vjS8bXFKZD5icwe4
+      - NEAR_NETWORK=testnet
+    restart: unless-stopped
+    networks:
+      - near-deep-yield-network
+
+networks:
+  near-deep-yield-network:
+    driver: bridge
+
+volumes:
+  influxdb-data:

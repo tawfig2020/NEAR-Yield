@@ -1,0 +1,139 @@
+security:
+  rate_limiting:
+    enabled: true
+    rules:
+      - path: "/api/v1/*"
+        limit: 100
+        window: "1m"
+      - path: "/api/v1/security/*"
+        limit: 50
+        window: "1m"
+      - path: "/api/v1/contract/*"
+        limit: 200
+        window: "1m"
+      - path: "/ws"
+        limit: 1000
+        window: "1m"
+    
+  ip_whitelist:
+    enabled: true
+    lists:
+      admin:
+        - "203.0.113.0/24"  # Office network
+        - "198.51.100.0/24" # VPN network
+      api:
+        - "192.0.2.0/24"    # API gateway
+    paths:
+      "/api/v1/admin/*":
+        - admin
+      "/api/v1/security/*":
+        - admin
+        - api
+        
+  cors:
+    enabled: true
+    allowed_origins:
+      - "https://app.nearyield.com"
+      - "https://staging.nearyield.com"
+    allowed_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+    allowed_headers:
+      - "Authorization"
+      - "Content-Type"
+    
+  auth:
+    jwt:
+      issuer: "nearyield.com"
+      audience: "nearyield-api"
+      expiration: "1h"
+      refresh_expiration: "7d"
+    
+  penetration_testing:
+    enabled: true
+    targets:
+      - name: "API Endpoints"
+        url: "https://api.nearyield.com"
+        auth_required: true
+      - name: "WebSocket"
+        url: "wss://api.nearyield.com/ws"
+        auth_required: true
+    rules:
+      - category: "injection"
+        severity: "high"
+      - category: "authentication"
+        severity: "critical"
+      - category: "authorization"
+        severity: "critical"
+    schedule: "0 0 * * 0"  # Weekly on Sunday
+    
+  monitoring:
+    endpoints:
+      - path: "/health"
+        interval: "30s"
+      - path: "/metrics"
+        interval: "1m"
+    alerts:
+      - type: "rate_limit_exceeded"
+        threshold: 10
+        window: "5m"
+      - type: "unauthorized_access"
+        threshold: 5
+        window: "1m"
+    
+  backup:
+    enabled: true
+    types:
+      - name: "contract_state"
+        schedule: "0 */6 * * *"  # Every 6 hours
+        retention: "30d"
+      - name: "configuration"
+        schedule: "0 0 * * *"    # Daily
+        retention: "90d"
+      - name: "audit_logs"
+        schedule: "0 */12 * * *" # Every 12 hours
+        retention: "365d"
+    storage:
+      type: "s3"
+      bucket: "nearyield-backups"
+      prefix: "prod"
+    encryption:
+      enabled: true
+      kms_key_id: "arn:aws:kms:region:account:key/key-id"
+    
+  incident_response:
+    enabled: true
+    procedures:
+      - event: "unauthorized_access"
+        actions:
+          - "block_ip"
+          - "notify_admin"
+          - "log_incident"
+      - event: "contract_vulnerability"
+        actions:
+          - "pause_contract"
+          - "notify_emergency"
+          - "initiate_recovery"
+    contacts:
+      primary: "security@nearyield.com"
+      emergency: "+1-555-0123"
+      
+  compliance:
+    audit_logging:
+      enabled: true
+      retention: "365d"
+      fields:
+        - "timestamp"
+        - "action"
+        - "user"
+        - "ip"
+        - "resource"
+        - "status"
+    data_encryption:
+      at_rest: true
+      in_transit: true
+    access_control:
+      rbac_enabled: true
+      default_role: "readonly"

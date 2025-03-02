@@ -1,0 +1,26 @@
+FROM node:18
+
+WORKDIR /app
+
+# Install global dependencies
+ENV SHELL=/bin/bash
+RUN npm install -g pnpm near-cli
+RUN mkdir -p /root/.local/share/pnpm
+RUN pnpm setup
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN pnpm install -g near-sdk-js
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN pnpm install
+
+# Copy source files
+COPY . .
+
+# Build the contract
+RUN pnpm run build
+
+CMD ["pnpm", "run", "deploy"]

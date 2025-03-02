@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+target/
+Cargo.lock
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# NEAR credentials and keys
+.near-credentials/
+.near-credentials-encrypted/
+secure-backups/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Security and monitoring
+error_state.json
+last-rotation.txt
+security-checks/
+
+# Build outputs
+dist/
+build/
+out/
+*.wasm
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.DS_Store
+
+# Temporary files
+*.swp
+*.swo
+*~
+.tmp/
+temp/

@@ -1,0 +1,128 @@
+apiVersion: monitoring.googleapis.com/v1
+kind: AlertPolicy
+metadata:
+  name: near-yield-security-alerts
+  project: nearagents
+displayName: "NEAR Yield Security Alerts"
+documentation:
+  content: "Security alerts for the NEAR Yield platform"
+  mimeType: "text/markdown"
+combiner: OR
+conditions:
+  - displayName: "IAM Policy Changes"
+    conditionThreshold:
+      filter: >
+        resource.type="project" AND
+        protoPayload.methodName="SetIamPolicy"
+      comparison: COMPARISON_GT
+      threshold:
+        value: 0
+      duration: 0s
+      trigger:
+        count: 1
+
+  - displayName: "Service Account Key Creation"
+    conditionThreshold:
+      filter: >
+        resource.type="service_account" AND
+        protoPayload.methodName="google.iam.admin.v1.CreateServiceAccountKey"
+      comparison: COMPARISON_GT
+      threshold:
+        value: 0
+      duration: 0s
+      trigger:
+        count: 1
+
+  - displayName: "Unauthorized API Access"
+    conditionThreshold:
+      filter: >
+        resource.type="api" AND
+        http_response.status>=400
+      comparison: COMPARISON_GT
+      threshold:
+        value: 10
+      duration: 300s
+      trigger:
+        count: 1
+
+  - displayName: "Secret Access"
+    conditionThreshold:
+      filter: >
+        resource.type="secret_manager_secret" AND
+        protoPayload.methodName=~"AccessSecretVersion"
+      comparison: COMPARISON_GT
+      threshold:
+        value: 5
+      duration: 300s
+      trigger:
+        count: 1
+
+  - displayName: "VPC Configuration Changes"
+    conditionThreshold:
+      filter: >
+        resource.type="gce_network" AND
+        protoPayload.methodName=~"compute.networks"
+      comparison: COMPARISON_GT
+      threshold:
+        value: 0
+      duration: 0s
+      trigger:
+        count: 1
+
+alertStrategy:
+  autoClose: 7200s  # Auto-close after 2 hours if condition clears
+
+notificationChannels:
+  - type: email
+    labels:
+      email_address: "security-alerts@nearagents.com"
+
+  - type: slack
+    labels:
+      channel_name: "#security-alerts"
+
+---
+# Audit logging configuration
+auditConfigs:
+  - service: "allServices"
+    auditLogConfigs:
+      - logType: "ADMIN_READ"
+      - logType: "DATA_READ"
+      - logType: "DATA_WRITE"
+
+---
+# VPC Service Controls
+servicePerimeter:
+  name: "near_yield_perimeter"
+  title: "NEAR Yield Security Perimeter"
+  description: "VPC Service Controls for NEAR Yield platform"
+  resources:
+    - "projects/nearagents"
+  restrictedServices:
+    - "storage.googleapis.com"
+    - "containerregistry.googleapis.com"
+    - "cloudbuild.googleapis.com"
+    - "cloudkms.googleapis.com"
+    - "secretmanager.googleapis.com"
+  accessLevels:
+    - "accessPolicies/YOUR_POLICY_ID/accessLevels/trusted_networks"
+
+---
+# Organization policies
+constraints:
+  - constraint: "constraints/compute.requireOsLogin"
+    booleanPolicy:
+      enforced: true
+  
+  - constraint: "constraints/compute.requireShieldedVm"
+    booleanPolicy:
+      enforced: true
+  
+  - constraint: "constraints/iam.allowedPolicyMemberDomains"
+    listPolicy:
+      allowedValues:
+        - "nearagents.com"
+  
+  - constraint: "constraints/storage.uniformBucketLevelAccess"
+    booleanPolicy:
+      enforced: true

@@ -1,0 +1,31 @@
+{
+    "project_id": "nearagents",
+    "region": "asia-southeast1",
+    "service_accounts": {
+        "cloud_build": {
+            "name": "cloud-build-near@nearagents.iam.gserviceaccount.com",
+            "key_path": "./secrets/cloud-build-key.json"
+        },
+        "container_registry": {
+            "name": "container-registry-near@nearagents.iam.gserviceaccount.com",
+            "key_path": "./secrets/container-registry-key.json"
+        }
+    },
+    "services": {
+        "cloud_build": {
+            "enabled": true,
+            "trigger_branch": "main"
+        },
+        "container_registry": {
+            "enabled": true,
+            "location": "asia.gcr.io"
+        },
+        "cloud_run": {
+            "enabled": true,
+            "region": "asia-southeast1"
+        },
+        "secret_manager": {
+            "enabled": true
+        }
+    }
+}

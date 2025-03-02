@@ -1,0 +1,25 @@
+{
+  "images": {
+    "sentiment-gauge": {
+      "path": "/assets/sentiment-gauge.webp",
+      "alt": "Real-time market sentiment visualization with AI-powered analysis",
+      "dimensions": {
+        "width": 1200,
+        "height": 675
+      }
+    },
+    "yield-comparison": {
+      "path": "/assets/yield-comparison.webp",
+      "alt": "Chart showing AI-optimized yields vs traditional yields",
+      "dimensions": {
+        "width": 1200,
+        "height": 675
+      }
+    },
+    "background-patterns": {
+      "grid": "/assets/patterns/grid.svg",
+      "dots": "/assets/patterns/dots.svg",
+      "waves": "/assets/patterns/waves.svg"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "deep-yield-contract",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "near-sdk-js build src/deep-yield.ts build/deep-yield.wasm",
+    "deploy": "near deploy --wasmFile build/deep-yield.wasm --accountId tawfig2030ai.testnet",
+    "test": "jest"
+  },
+  "dependencies": {
+    "near-sdk-js": "1.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

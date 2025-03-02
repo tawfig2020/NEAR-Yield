@@ -1,0 +1,14 @@
+{
+  "name": "near-yield-keeper-bot",
+  "version": "1.0.0",
+  "description": "Keeper bot for NEAR Deep Yield protocol",
+  "main": "autocompound.js",
+  "scripts": {
+    "start": "node autocompound.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "near-api-js": "^1.1.0",
+    "dotenv": "^16.0.0"
+  }
+}

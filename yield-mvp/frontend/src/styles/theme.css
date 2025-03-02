@@ -1,0 +1,129 @@
+:root {
+  /* Light theme colors */
+  --primary-light: #3498db;
+  --secondary-light: #2ecc71;
+  --background-light: #ffffff;
+  --surface-light: #f8f9fa;
+  --text-primary-light: #2c3e50;
+  --text-secondary-light: #7f8c8d;
+  --error-light: #e74c3c;
+  --success-light: #27ae60;
+  --warning-light: #f1c40f;
+  --border-light: #e0e0e0;
+
+  /* Dark theme colors */
+  --primary-dark: #2980b9;
+  --secondary-dark: #27ae60;
+  --background-dark: #1a1a1a;
+  --surface-dark: #2d2d2d;
+  --text-primary-dark: #ecf0f1;
+  --text-secondary-dark: #bdc3c7;
+  --error-dark: #c0392b;
+  --success-dark: #219a52;
+  --warning-dark: #d4ac0d;
+  --border-dark: #404040;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Light theme default */
+:root[data-theme="light"] {
+  --primary: var(--primary-light);
+  --secondary: var(--secondary-light);
+  --background: var(--background-light);
+  --surface: var(--surface-light);
+  --text-primary: var(--text-primary-light);
+  --text-secondary: var(--text-secondary-light);
+  --error: var(--error-light);
+  --success: var(--success-light);
+  --warning: var(--warning-light);
+  --border: var(--border-light);
+}
+
+/* Dark theme */
+:root[data-theme="dark"] {
+  --primary: var(--primary-dark);
+  --secondary: var(--secondary-dark);
+  --background: var(--background-dark);
+  --surface: var(--surface-dark);
+  --text-primary: var(--text-primary-dark);
+  --text-secondary: var(--text-secondary-dark);
+  --error: var(--error-dark);
+  --success: var(--success-dark);
+  --warning: var(--warning-dark);
+  --border: var(--border-dark);
+}
+
+/* Base styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--background);
+  color: var(--text-primary);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+/* Responsive breakpoints */
+@media (max-width: 640px) {
+  :root {
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.5rem;
+    --font-size-2xl: 1.25rem;
+  }
+}
+
+/* Utility classes */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0 var(--spacing-sm);
+  }
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}

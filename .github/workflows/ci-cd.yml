@@ -1,0 +1,103 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+      - name: OWASP ZAP Scan
+        uses: zaproxy/action-baseline@v0.7.0
+        with:
+          target: 'https://${{ secrets.DEPLOYMENT_URL }}'
+          
+  test:
+    needs: security-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          
+      - name: Install Dependencies
+        run: |
+          npm ci
+          cd frontend && npm ci
+          cd ../dashboard && npm ci
+          
+      - name: Run Tests
+        run: |
+          npm run test
+          npm run integration-test
+        env:
+          NEAR_NETWORK: testnet
+          NEAR_ACCOUNT_ID: ${{ secrets.NEAR_ACCOUNT_ID }}
+          NEAR_PRIVATE_KEY: ${{ secrets.NEAR_PRIVATE_KEY }}
+          
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          
+      - name: Build Application
+        run: |
+          npm ci
+          npm run build
+          cd frontend && npm ci && npm run build
+          cd ../dashboard && npm ci && npm run build
+          
+      - name: Deploy to AWS
+        run: |
+          aws s3 sync frontend/build s3://${{ secrets.AWS_S3_BUCKET }}/frontend/ --delete
+          aws s3 sync dashboard/build s3://${{ secrets.AWS_S3_BUCKET }}/dashboard/ --delete
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+          
+      - name: Create Backup
+        run: |
+          aws s3 sync s3://${{ secrets.AWS_S3_BUCKET }} s3://${{ secrets.BACKUP_BUCKET }}/$(date +%Y-%m-%d)/
+        
+      - name: Deploy Contract
+        run: |
+          near deploy --accountId ${{ secrets.NEAR_ACCOUNT_ID }} --wasmFile ./contract/build/contract.wasm
+        env:
+          NEAR_ENV: mainnet
+          NEAR_ACCOUNT_ID: ${{ secrets.NEAR_ACCOUNT_ID }}
+          NEAR_PRIVATE_KEY: ${{ secrets.NEAR_PRIVATE_KEY }}
+
+  notify:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Notify Deployment Status
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

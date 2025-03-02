@@ -1,0 +1,123 @@
+monitoring:
+  alertPolicies:
+    - displayName: "Security Alert - IAM Changes"
+      documentation:
+        content: "Alert triggered when IAM permissions are modified"
+        mimeType: "text/markdown"
+      conditions:
+        - displayName: "IAM Policy Changes"
+          conditionThreshold:
+            filter: 'resource.type="project" AND protoPayload.methodName="SetIamPolicy"'
+            comparison: COMPARISON_GT
+            threshold: 0
+            duration: 0s
+            trigger:
+              count: 1
+
+    - displayName: "Security Alert - Service Account Key Creation"
+      documentation:
+        content: "Alert triggered when new service account keys are created"
+      conditions:
+        - displayName: "Service Account Key Creation"
+          conditionThreshold:
+            filter: 'resource.type="service_account" AND protoPayload.methodName="google.iam.admin.v1.CreateServiceAccountKey"'
+            comparison: COMPARISON_GT
+            threshold: 0
+            duration: 0s
+
+    - displayName: "Security Alert - VPC Changes"
+      documentation:
+        content: "Alert triggered when VPC configuration is modified"
+      conditions:
+        - displayName: "VPC Configuration Changes"
+          conditionThreshold:
+            filter: 'resource.type="gce_network" AND protoPayload.methodName=~"^compute.networks"'
+            comparison: COMPARISON_GT
+            threshold: 0
+            duration: 0s
+
+auditLogging:
+  logTypes:
+    - ADMIN_READ
+    - DATA_READ
+    - DATA_WRITE
+  services:
+    - allServices
+
+vpcServiceControls:
+  servicePerimeter:
+    accessLevels:
+      - "accessPolicies/${PROJECT_NUMBER}/accessLevels/trusted_source"
+    restrictedServices:
+      - "container.googleapis.com"
+      - "cloudbuild.googleapis.com"
+      - "containerregistry.googleapis.com"
+      - "run.googleapis.com"
+
+organizationPolicies:
+  - constraint: "compute.requireOsLogin"
+    enforce: true
+  - constraint: "compute.disableSerialPortAccess"
+    enforce: true
+  - constraint: "compute.requireShieldedVm"
+    enforce: true
+  - constraint: "iam.allowedPolicyMemberDomains"
+    listPolicy:
+      allowedValues:
+        - "your-domain.com"
+
+securityControls:
+  - name: "Require Cloud KMS encryption"
+    enforcement: true
+  - name: "Block public IP addresses"
+    enforcement: true
+  - name: "Require private Google Access"
+    enforcement: true
+
+securityMonitoring:
+  key_rotation:
+    frequency_days: 30
+    notification_before_days: 7
+    backup_enabled: true
+    backup_location: "../backups/keys"
+  
+  intrusion_detection:
+    scan_frequency_minutes: 15
+    max_failed_attempts: 5
+    lockout_duration_minutes: 30
+    suspicious_patterns:
+      - multiple_failed_transactions
+      - high_value_transfers
+      - unusual_contract_calls
+  
+  alerts:
+    channels:
+      email:
+        enabled: true
+        recipients:
+          - admin@nearyield.com
+      webhook:
+        enabled: true
+        url: "https://api.alerts.nearyield.com/webhook"
+    
+    severity_levels:
+      - critical
+      - warning
+      - info
+    
+    notification_rules:
+      - event: key_rotation_needed
+        severity: warning
+        channels: [email, webhook]
+      - event: intrusion_detected
+        severity: critical
+        channels: [email, webhook]
+      - event: suspicious_activity
+        severity: warning
+        channels: [webhook]
+  
+  logging:
+    enabled: true
+    retention_days: 90
+    log_directory: "../logs/security"
+    include_debug: false

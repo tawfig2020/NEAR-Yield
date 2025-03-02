@@ -1,0 +1,120 @@
+# Monitoring Configuration for NEAR Yield Platform
+
+# Alert Thresholds
+alerts:
+  sentiment:
+    critical_low: 20
+    warning_low: 30
+    interval: 300  # 5 minutes
+
+  performance:
+    min_apy: 5.0
+    target_apy: 12.0
+    max_drawdown: 10.0  # percentage
+
+  gas:
+    max_price: 300  # in TGas
+    alert_threshold: 250  # Alert when gas price exceeds this
+
+  rebalancing:
+    max_slippage: 1.0  # percentage
+    min_interval: 3600  # seconds
+
+# Monitoring Endpoints
+endpoints:
+  health_check: "/api/v1/health"
+  metrics: "/api/v1/metrics"
+  alerts: "/api/v1/alerts"
+
+# Logging Configuration
+logging:
+  level: INFO
+  format: json
+  retention_days: 30
+  paths:
+    info: "./logs/info.log"
+    error: "./logs/error.log"
+    audit: "./logs/audit.log"
+
+# Metrics Collection
+metrics:
+  collection_interval: 60  # seconds
+  retention_period: 90  # days
+  exporters:
+    prometheus:
+      enabled: true
+      port: 9090
+    grafana:
+      enabled: true
+      dashboard_uid: "near_yield_metrics"
+
+# Alert Notifications
+notifications:
+  email:
+    enabled: true
+    recipients:
+      - "alerts@nearagents.near"
+  telegram:
+    enabled: true
+    chat_id: "NEAR_YIELD_ALERTS"
+  discord:
+    enabled: true
+    webhook_url: "https://discord.com/api/webhooks/YOUR_WEBHOOK"
+
+# Health Checks
+health_checks:
+  endpoints:
+    - name: "NEAR RPC"
+      url: "https://rpc.mainnet.near.org"
+      interval: 60
+      timeout: 5
+    - name: "Ref Finance"
+      url: "https://api.ref-finance.near.org"
+      interval: 60
+      timeout: 5
+    - name: "Aurora"
+      url: "https://api.aurora.dev"
+      interval: 60
+      timeout: 5
+
+# Performance Monitoring
+performance_metrics:
+  - name: "portfolio_value"
+    type: "gauge"
+    help: "Total portfolio value in USD"
+  - name: "apy"
+    type: "gauge"
+    help: "Current APY of the portfolio"
+  - name: "sentiment_score"
+    type: "gauge"
+    help: "Current market sentiment score"
+  - name: "gas_price"
+    type: "gauge"
+    help: "Current gas price in TGas"
+
+# Custom Dashboards
+dashboards:
+  - name: "Portfolio Overview"
+    refresh: "1m"
+    panels:
+      - title: "Portfolio Value"
+        type: "graph"
+        metric: "portfolio_value"
+      - title: "APY"
+        type: "gauge"
+        metric: "apy"
+      - title: "Sentiment"
+        type: "gauge"
+        metric: "sentiment_score"
+  - name: "Risk Analytics"
+    refresh: "5m"
+    panels:
+      - title: "Asset Allocation"
+        type: "pie"
+        metric: "asset_allocation"
+      - title: "Risk Metrics"
+        type: "table"
+        metrics:
+          - "volatility"
+          - "sharpe_ratio"
+          - "max_drawdown"

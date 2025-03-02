@@ -1,0 +1,60 @@
+# AI-Driven NEAR Yield Strategy Configuration
+
+# Data Collection Parameters
+scraping:
+  default_interval: 3600  # 1 hour in seconds
+  volatile_interval: 300  # 5 minutes in seconds
+  price_volatility_threshold: 5.0  # 5% price movement triggers volatile mode
+  minimum_tweets: 100  # Increased from 50 to reduce noise
+  sentiment_thresholds:
+    bearish: 25
+    bullish: 75
+  volume_thresholds:
+    min_24h: 1000  # Minimum 24h tweet volume
+    min_hourly: 50  # Minimum hourly tweet volume
+  smoothing:
+    window_size: 12  # Hours to average sentiment over
+    min_samples: 6   # Minimum samples needed for valid signal
+  
+# Fallback Strategy
+fallback:
+  primary: "cryptopanic"
+  secondary: "historical_average"
+  historical_window: 86400  # 24 hours in seconds
+
+# Portfolio Rebalancing
+rebalancing:
+  min_rebalance_interval: 3600  # 1 hour minimum between rebalances
+  gas_price_threshold: 100  # Maximum gas price in yoctoNEAR
+  slippage_tolerance: 0.5  # 0.5% maximum slippage
+
+# Safety Parameters
+safety:
+  max_single_allocation: 80  # Maximum % allocation to single strategy
+  min_staking_ratio: 20  # Minimum % in staking
+  emergency_threshold: 20  # Sentiment score triggering emergency procedures
+
+# Smart Contract Parameters
+contracts:
+  proxy_deployment:
+    initial_stake: 1  # NEAR tokens required for deployment
+    max_gas: 300000000000000  # Maximum gas for contract calls
+
+# Yield Sources
+yield_sources:
+  staking:
+    min_validator_fee: 2  # Minimum validator fee percentage
+    max_validator_fee: 20  # Maximum validator fee percentage
+  
+  defi:
+    aurora_pools:
+      risk_levels:
+        low: ["usdc_usdt", "usdc_dai"]
+        medium: ["near_usdc", "near_usdt"]
+        high: ["near_weth", "near_wbtc"]
+    
+    ref_finance:
+      risk_levels:
+        low: ["stable_pool"]
+        medium: ["near_stable"]
+        high: ["near_meta"]

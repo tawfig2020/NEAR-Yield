@@ -1,0 +1,20 @@
+[service]
+host = "127.0.0.1"
+port = 8080
+log_level = "info"
+
+[websocket]
+url = "wss://stream.twitter.com/1.1/statuses/filter.json"
+retry_max = 5
+retry_delay = 5
+
+[near]
+network = "testnet"
+node_url = "https://rpc.testnet.near.org"
+contract_id = "yield-agent.testnet"
+
+[analysis]
+min_tvl = 1000000.0
+high_apy_threshold = 30.0
+risk_threshold = 0.7
+confidence_threshold = 0.8

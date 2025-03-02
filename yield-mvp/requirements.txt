@@ -1,0 +1,10 @@
+tensorflow==2.18.0
+scikit-learn==1.5.1
+pandas==2.2.3
+numpy==1.26.4
+torch==2.6.0
+torchvision==0.21.0
+torchaudio==2.6.0
+h5py==3.11.0
+tensorboard==2.18.0
+keras==3.8.0

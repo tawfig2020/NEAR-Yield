@@ -1,0 +1,64 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Configure AWS
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        
+      - name: Build Backend
+        run: |
+          cd backend
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/near-deep-yield-backend:${GITHUB_SHA} .
+          docker push ${{ steps.login-ecr.outputs.registry }}/near-deep-yield-backend:${GITHUB_SHA}
+          
+      - name: Build Frontend
+        run: |
+          cd frontend
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/near-deep-yield-frontend:${GITHUB_SHA} .
+          docker push ${{ steps.login-ecr.outputs.registry }}/near-deep-yield-frontend:${GITHUB_SHA}
+
+  deploy-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+      - name: Deploy to ECS Staging
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: staging-task-definition.json
+          service: near-deep-yield-staging
+          cluster: staging-cluster
+          wait-for-service-stability: true
+
+  deploy-prod:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Deploy to ECS Production
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: prod-task-definition.json
+          service: near-deep-yield-prod
+          cluster: prod-cluster
+          wait-for-service-stability: true
