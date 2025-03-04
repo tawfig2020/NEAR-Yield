@@ -28,9 +28,9 @@ services:
       - INFLUXDB_URL=http://influxdb:8087
       - NEAR_NODE_URL=https://rpc.testnet.near.org
       - NEAR_NETWORK_ID=testnet
-      - NEAR_CONTRACT_ID=tawfig2030ai.testnet
-      - NEAR_ACCOUNT_ID=tawfig2030ai.testnet
-      - NEAR_PRIVATE_KEY=ed25519:5T2tqwzcmD9qkPkSbBmJXfcLUgbfuLRGTbeX7WnKhmWBqU1UJ5fTehSMDnM4wjEhMJrVevE6vjS8bXFKZD5icwe4
+      - NEAR_CONTRACT_ID=${NEAR_CONTRACT_ID}
+      - NEAR_ACCOUNT_ID=${NEAR_ACCOUNT_ID}
+      - NEAR_PRIVATE_KEY=${NEAR_PRIVATE_KEY}
     restart: unless-stopped
     networks:
       - near-deep-yield-network
@@ -61,9 +61,9 @@ services:
       - INFLUXDB_URL=http://influxdb:8087
       - NEAR_NODE_URL=https://rpc.testnet.near.org
       - NEAR_NETWORK_ID=testnet
-      - NEAR_CONTRACT_ID=tawfig2030ai.testnet
-      - NEAR_ACCOUNT_ID=tawfig2030ai.testnet
-      - NEAR_PRIVATE_KEY=ed25519:5T2tqwzcmD9qkPkSbBmJXfcLUgbfuLRGTbeX7WnKhmWBqU1UJ5fTehSMDnM4wjEhMJrVevE6vjS8bXFKZD5icwe4
+      - NEAR_CONTRACT_ID=${NEAR_CONTRACT_ID}
+      - NEAR_ACCOUNT_ID=${NEAR_ACCOUNT_ID}
+      - NEAR_PRIVATE_KEY=${NEAR_PRIVATE_KEY}
       - NEAR_NETWORK=testnet
     restart: unless-stopped
     networks:
